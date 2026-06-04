@@ -1,0 +1,105 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mukabareke
+    ports:
+      - "55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4001
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/auth_db?schema=public
+      USER_SERVICE_URL: http://user-service:4002
+      INTERNAL_SERVICE_KEY: dev-internal-service-key-change-me
+      JWT_ACCESS_SECRET: replace-with-a-strong-32-byte-secret-minimum
+      JWT_REFRESH_SECRET: replace-with-another-strong-32-byte-secret
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+      FRONTEND_URL: http://localhost:5173
+      EMAIL_ENABLED: "false"
+    ports:
+      - "4001:4001"
+
+  user-service:
+    build:
+      context: .
+      dockerfile: services/user-service/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4002
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/user_db?schema=public
+      AUTH_SERVICE_URL: http://auth-service:4001
+      INTERNAL_SERVICE_KEY: dev-internal-service-key-change-me
+      JWT_ACCESS_SECRET: replace-with-a-strong-32-byte-secret-minimum
+      JWT_REFRESH_SECRET: replace-with-another-strong-32-byte-secret
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+    ports:
+      - "4002:4002"
+
+  file-service:
+    build:
+      context: .
+      dockerfile: services/file-service/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4003
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/file_db?schema=public
+      JWT_ACCESS_SECRET: replace-with-a-strong-32-byte-secret-minimum
+      JWT_REFRESH_SECRET: replace-with-another-strong-32-byte-secret
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+      UPLOAD_DIR: uploads
+      MAX_UPLOAD_MB: 10
+    ports:
+      - "4003:4003"
+    volumes:
+      - file_uploads:/app/uploads
+
+  gateway:
+    build:
+      context: .
+      dockerfile: services/gateway/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - auth-service
+      - user-service
+      - file-service
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_PREFIX: /api/v1
+      AUTH_SERVICE_URL: http://auth-service:4001
+      USER_SERVICE_URL: http://user-service:4002
+      FILE_SERVICE_URL: http://file-service:4003
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
+  file_uploads:

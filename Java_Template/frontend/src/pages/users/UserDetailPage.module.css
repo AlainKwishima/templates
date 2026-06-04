@@ -1,0 +1,45 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.back:hover {
+  color: var(--color-primary);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+}
+
+.dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.dl dt {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.dl dd {
+  font-weight: 500;
+  margin-top: var(--space-1);
+}
+
+.actions {
+  margin-top: var(--space-4);
+}

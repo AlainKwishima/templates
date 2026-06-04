@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UploadedFile {
+  id           String    @id @default(cuid())
+  userId       String?
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  path         String
+  storage      String    @default("local")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  @@index([userId, deletedAt])
+}

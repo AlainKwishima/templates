@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+}
+
+model User {
+  id                     String    @id @default(uuid())
+  firstName              String
+  lastName               String
+  email                  String    @unique
+  password               String
+  roleId                 String
+  isEmailVerified        Boolean   @default(false)
+  emailVerificationToken String?
+  passwordResetToken     String?
+  passwordResetExpiry    DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  role          Role           @relation(fields: [roleId], references: [id])
+  refreshTokens RefreshToken[]
+  transactions  Transaction[]
+  notifications Notification[]
+
+  @@index([email])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Department {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  resources   Resource[]
+}
+
+model Resource {
+  id           String         @id @default(uuid())
+  name         String
+  code         String         @unique
+  description  String?
+  status       ResourceStatus @default(Active)
+  departmentId String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  department   Department    @relation(fields: [departmentId], references: [id])
+  transactions Transaction[]
+
+  @@index([code])
+  @@index([departmentId])
+}
+
+model Transaction {
+  id              String            @id @default(uuid())
+  userId          String
+  resourceId      String
+  transactionDate DateTime
+  returnDate      DateTime?
+  status          TransactionStatus @default(Pending)
+  notes           String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id])
+  resource Resource @relation(fields: [resourceId], references: [id])
+
+  @@index([userId])
+  @@index([resourceId])
+  @@index([status])
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String
+  subject   String
+  body      String
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ResourceStatus {
+  Active
+  Inactive
+}
+
+enum TransactionStatus {
+  Pending
+  Active
+  Completed
+  Cancelled
+}

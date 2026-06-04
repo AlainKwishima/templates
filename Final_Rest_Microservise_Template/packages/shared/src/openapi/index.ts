@@ -1,0 +1,10 @@
+export { authOpenApi } from './specs/auth';
+export { userOpenApi } from './specs/user';
+export { roleOpenApi } from './specs/role';
+export { departmentOpenApi } from './specs/department';
+export { resourceOpenApi } from './specs/resource';
+export { transactionOpenApi } from './specs/transaction';
+export { notificationOpenApi } from './specs/notification';
+export { reportOpenApi } from './specs/report';
+export { dashboardOpenApi } from './specs/dashboard';
+export type { OpenApiDocument } from './types';

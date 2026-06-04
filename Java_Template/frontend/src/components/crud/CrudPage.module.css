@@ -1,0 +1,9 @@
+.filters {
+  margin-bottom: var(--space-4);
+}
+
+.headerActions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}

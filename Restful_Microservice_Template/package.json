@@ -1,0 +1,30 @@
+{
+  "name": "restful-microservices",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "services/*",
+    "frontend"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev:all": "concurrently -k -n gateway,auth,users,files \"npm:dev:gateway\" \"npm:dev:auth\" \"npm:dev:users\" \"npm:dev:files\"",
+    "dev:gateway": "npm run dev -w @restful/gateway",
+    "dev:auth": "npm run dev -w @restful/auth-service",
+    "dev:users": "npm run dev -w @restful/user-service",
+    "dev:files": "npm run dev -w @restful/file-service",
+    "dev:frontend": "npm run dev -w frontend",
+    "build": "npm run build -w @restful/shared && npm run build -w @restful/service-kit && npm run build --workspaces --if-present",
+    "db:migrate": "npm run prisma:migrate:deploy -w @restful/user-service && npm run prisma:migrate:deploy -w @restful/auth-service && npm run prisma:migrate:deploy -w @restful/file-service",
+    "db:migrate:dev": "npm run prisma:migrate:dev -w @restful/user-service && npm run prisma:migrate:dev -w @restful/auth-service && npm run prisma:migrate:dev -w @restful/file-service",
+    "db:seed": "npm run db:seed -w @restful/user-service && npm run db:seed -w @restful/auth-service",
+    "test:e2e": "node scripts/e2e-test.mjs",
+    "docker:up": "docker compose up -d postgres",
+    "docker:down": "docker compose down",
+    "docker:full": "docker compose up --build"
+  }
+}

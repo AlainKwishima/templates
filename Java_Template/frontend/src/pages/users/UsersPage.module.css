@@ -1,0 +1,38 @@
+.filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  align-items: end;
+}
+
+.filterAction {
+  padding-bottom: 1px;
+}
+
+.nameLink {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.nameLink:hover {
+  color: var(--color-primary);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .filters {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+}

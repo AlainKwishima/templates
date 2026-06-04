@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: ims-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mukabareke
+      POSTGRES_DB: ims_db
+    ports:
+      - "15432:5432"
+    volumes:
+      - ims_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: ims-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/ims_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=mukabareke
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  ims_pgdata:
